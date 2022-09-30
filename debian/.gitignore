@@ -1,0 +1,7 @@
+libssl*/
+tmp/
+files
+debhelper-build-stamp
+copyright
+*.log
+*.substvars

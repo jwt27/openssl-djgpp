@@ -1,0 +1,34 @@
+#!/usr/bin/make -f
+
+HOST   := i386-pc-msdosdjgpp
+CFLAGS := -O2 -g -march=i386 -mtune=pentium-mmx
+CFLAGS += -ffunction-sections -fdata-sections
+CFLAGS += -DOPENSSL_DEV_NO_ATOMICS
+export CFLAGS
+
+%:
+	dh $@
+
+override_dh_auto_clean:
+	-git clean -fX
+	-rm -f debian/pgp-secret.asc
+	cp LICENSE.txt debian/copyright
+
+override_dh_auto_configure:
+	./Configure --prefix=/usr/$(HOST) --cross-compile-prefix=$(HOST)- \
+		no-pic no-shared no-hw no-threads no-tests zlib 386 DJGPP
+
+override_dh_auto_build:
+	$(MAKE) build_libs build_man_docs
+
+override_dh_auto_install:
+	$(MAKE) install_dev install_man_docs DESTDIR=$(CURDIR)/debian/libssl-djgpp-dev
+
+override_dh_auto_test:
+	# skip
+
+override_dh_installchangelogs:
+	dh_installchangelogs CHANGES.md
+
+override_dh_strip:
+	dh_strip --exclude=.a

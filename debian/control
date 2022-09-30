@@ -1,0 +1,21 @@
+Source: openssl-djgpp
+Section: devel
+Priority: optional
+Maintainer: jwt27 <jwjagersma@gmail.com>
+Build-Depends:
+ debhelper (>= 11),
+ gcc-djgpp,
+ binutils-djgpp,
+ djgpp-dev,
+ djgpp-utils,
+ libwatt-djgpp-dev,
+ zlib-djgpp-dev,
+ perl
+Standards-Version: 4.6.1
+
+Package: libssl-djgpp-dev
+Architecture: any
+Section: devel
+Depends: ${misc:Depends}, libc-djgpp-dev, libwatt-djgpp-dev, zlib-djgpp-dev
+Recommends: gcc-djgpp, binutils-djgpp, djgpp-utils
+Description: OpenSSL library for djgpp
