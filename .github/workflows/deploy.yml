@@ -1,0 +1,66 @@
+name: Deploy PPA
+
+on:
+  push:
+    branches: djgpp-ppa
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      good: ${{ steps.docheck.outputs.good }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: docheck
+        name: Check release state
+        run: |
+          echo "::set-output name=good::$([ -z "$(head -n 1 debian/changelog | grep 'UNRELEASED')" ] && echo 'true' || echo 'false')"
+
+  build:
+    runs-on: ubuntu-latest
+    needs: check
+    if: needs.check.outputs.good == 'true'
+    strategy:
+      matrix:
+        ubuntu-version: [ bionic, focal, jammy, kinetic ]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install debhelper devscripts dput gpg
+
+      - name: Setup package files
+        env:
+          UBUNTU_VERSION: ${{ matrix.ubuntu-version }}
+        run: |
+          mv debian/pgp-secret.asc /tmp/
+          sed -i "s/) unstable/~$UBUNTU_VERSION) $UBUNTU_VERSION/g" debian/changelog
+
+      - name: Make source package
+        run: |
+          debuild -S --no-sign -d
+
+      - name: Import signing key
+        env:
+          DECRYPT_KEY: ${{ secrets.DECRYPT_KEY }}
+        run: |
+          gpg --batch -k > /dev/null
+          gpg --batch --quiet --passphrase "$DECRYPT_KEY" -d /tmp/pgp-secret.asc | gpg --batch --import
+          rm -f /tmp/pgp-secret.asc
+          gpg --batch --keyserver keyserver.ubuntu.com --recv-keys 197C3D6E652B6B1C2B7F9EDF84089D0351487AB8
+
+      - name: Sign package
+        run: |
+          debsign -k197C3D6E652B6B1C2B7F9EDF84089D0351487AB8 ../*.changes
+
+      - name: Delete key
+        if: always()
+        run: |
+          sudo shred -fu $(gpgconf --list-dirs | grep homedir | sed 's/homedir://')/priv*/*
+
+      - name: Upload package
+        run: |
+          dput ppa:jwt27/djgpp-toolchain ../*.changes
