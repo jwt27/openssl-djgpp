@@ -1,3 +1,9 @@
+openssl-djgpp (3.1.1+0) unstable; urgency=medium
+
+  * OpenSSL version 3.1.1.
+
+ -- jwt27 <jwjagersma@gmail.com>  Mon, 12 Jun 2023 20:07:11 +0200
+
 openssl-djgpp (3.0.5+1) unstable; urgency=medium
 
   * Initial release, OpenSSL version 3.0.5.
