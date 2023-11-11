@@ -1,3 +1,9 @@
+openssl-djgpp (3.1.4) unstable; urgency=medium
+
+  * OpenSSL version 3.1.4.
+
+ -- jwt27 <jwjagersma@gmail.com>  Sat, 11 Nov 2023 15:49:23 +0100
+
 openssl-djgpp (3.1.1+0) unstable; urgency=medium
 
   * OpenSSL version 3.1.1.
